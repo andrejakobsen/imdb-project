@@ -1,4 +1,3 @@
 ---
-azure_storage_connectionstring: "connectionstring"
-container_name: "nbaproject"
-source_folder: "../data"
+container_name: "nbadata"
+source_folder: "./data"
