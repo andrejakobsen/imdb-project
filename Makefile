@@ -22,8 +22,10 @@ endif
 
 ## Install Python Dependencies
 requirements: test_environment
-	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
-	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
+	$(PYTHON_INTERPRETER) -m venv venv; \
+	source ./venv/bin/activate; \
+	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel; \
+	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt; \
 
 ## Make Dataset
 data: requirements
@@ -33,26 +35,33 @@ data: requirements
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
+	rm -rf venv
 
 ## Lint using flake8
 lint:
 	flake8 src
 
-## Upload Data to S3
-sync_data_to_s3:
+## Upload Data to Azure
+sync_data_to_azure:
 ifeq (default,$(PROFILE))
 	aws s3 sync data/ s3://$(BUCKET)/data/
 else
 	aws s3 sync data/ s3://$(BUCKET)/data/ --profile $(PROFILE)
 endif
 
-## Download Data from S3
-sync_data_from_s3:
-ifeq (default,$(PROFILE))
-	aws s3 sync s3://$(BUCKET)/data/ data/
-else
-	aws s3 sync s3://$(BUCKET)/data/ data/ --profile $(PROFILE)
-endif
+## Download Data from Azure
+sync_data_from_azure:
+	az storage blob download \
+    --account-name nbaproject \
+    --container-name nbadata \
+    --name some_data.csv \
+    --file ./data/some_data2.csv \
+    --account-key 5RmPnr7oBDLoX2LBWsf7YBqIYP54C8UP66j9isEp+GgNyywRFu9MOAQlcGnj3bgF+c+JVryFUIX5+AStBZe9+w==
+# ifeq (default,$(PROFILE))
+# 	aws s3 sync s3://$(BUCKET)/data/ data/
+# else
+# 	aws s3 sync s3://$(BUCKET)/data/ data/ --profile $(PROFILE)
+# endif
 
 ## Set up python interpreter environment
 create_environment:
